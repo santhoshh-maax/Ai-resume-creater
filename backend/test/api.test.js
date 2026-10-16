@@ -94,8 +94,10 @@ test('usage summary matches recorded requests', async () => {
   assert.strictEqual(s.totals.failed, 2);
   assert.strictEqual(s.totals.inputTokens, 100 * 3 + 10 + 10) // malformed (success) + truncated (error) both report tokens;
   assert.strictEqual(s.totals.outputTokens, 50 * 3 + 5 + 5);
+  assert.ok(s.totals.totalCostUsd > 0);
   assert.strictEqual((await (await fetch(base + '/api/usage/summary')).json()).anthropicReported.available, false);
   const d = await (await fetch(base + '/api/usage/details?pageSize=2')).json();
   assert.strictEqual(d.rows.length, 2);
+  assert.strictEqual(typeof d.rows[0].costUsd, 'number');
   assert.ok(!JSON.stringify(d).includes('test-key'));
 });

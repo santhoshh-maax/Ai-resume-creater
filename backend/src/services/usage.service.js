@@ -7,6 +7,36 @@ const MAX_LOG_BYTES = 5 * 1024 * 1024;
 
 let records = null;
 
+function getModelPricing(model) {
+  if (process.env.AI_COST_PER_MILLION_INPUT && process.env.AI_COST_PER_MILLION_OUTPUT) {
+    const customIn = Number(process.env.AI_COST_PER_MILLION_INPUT);
+    const customOut = Number(process.env.AI_COST_PER_MILLION_OUTPUT);
+    if (Number.isFinite(customIn) && Number.isFinite(customOut)) {
+      return { inPerMillion: customIn, outPerMillion: customOut, tier: 'Custom' };
+    }
+  }
+  const m = String(model || '').toLowerCase();
+  if (m.includes('opus')) {
+    return { inPerMillion: 15.0, outPerMillion: 75.0, tier: 'Claude Opus' };
+  }
+  if (m.includes('3-5-haiku') || m.includes('3.5-haiku') || m.includes('haiku-4')) {
+    return { inPerMillion: 0.8, outPerMillion: 4.0, tier: 'Claude 3.5 Haiku' };
+  }
+  if (m.includes('haiku')) {
+    return { inPerMillion: 0.25, outPerMillion: 1.25, tier: 'Claude 3 Haiku' };
+  }
+  return { inPerMillion: 3.0, outPerMillion: 15.0, tier: 'Claude Sonnet' };
+}
+
+function calculateCost(model, inputTokens, outputTokens) {
+  if (!Number.isFinite(inputTokens) && !Number.isFinite(outputTokens)) return null;
+  const inTokens = Number.isFinite(inputTokens) ? inputTokens : 0;
+  const outTokens = Number.isFinite(outputTokens) ? outputTokens : 0;
+  const pricing = getModelPricing(model);
+  const cost = (inTokens * pricing.inPerMillion + outTokens * pricing.outPerMillion) / 1e6;
+  return Math.round(cost * 1e6) / 1e6;
+}
+
 function load() {
   if (records) return records;
   records = [];
@@ -14,7 +44,13 @@ function load() {
     const raw = fs.readFileSync(LOG_FILE, 'utf8');
     for (const line of raw.split('\n')) {
       if (!line.trim()) continue;
-      try { records.push(JSON.parse(line)); } catch { /* skip corrupt line */ }
+      try {
+        const rec = JSON.parse(line);
+        if (rec.costUsd === undefined) {
+          rec.costUsd = calculateCost(rec.model, rec.inputTokens, rec.outputTokens);
+        }
+        records.push(rec);
+      } catch { /* skip corrupt line */ }
     }
   } catch { /* no log yet */ }
   return records;
@@ -34,6 +70,7 @@ function record({ model, feature, inputTokens, outputTokens, status, durationMs,
     inputTokens: hasIn ? inputTokens : null,
     outputTokens: hasOut ? outputTokens : null,
     totalTokens: hasIn && hasOut ? inputTokens + outputTokens : null,
+    costUsd: calculateCost(model, hasIn ? inputTokens : null, hasOut ? outputTokens : null),
     status,
     durationMs: Math.round(durationMs || 0),
     errorCategory: errorCategory || null,
@@ -91,22 +128,25 @@ function summary(q) {
     const m = {};
     for (const r of rows) {
       const k = r[key] || 'unknown';
-      m[k] = m[k] || { name: k, requests: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+      m[k] = m[k] || { name: k, requests: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, costUsd: 0 };
       m[k].requests += 1;
       m[k].inputTokens += r.inputTokens || 0;
       m[k].outputTokens += r.outputTokens || 0;
       m[k].totalTokens += r.totalTokens || 0;
+      m[k].costUsd = Math.round(((m[k].costUsd || 0) + (r.costUsd || 0)) * 1e6) / 1e6;
     }
     return Object.values(m).sort((a, b) => b.requests - a.requests);
   };
   const daily = {};
   for (const r of rows) {
     const d = r.ts.slice(0, 10);
-    daily[d] = daily[d] || { date: d, requests: 0, inputTokens: 0, outputTokens: 0 };
+    daily[d] = daily[d] || { date: d, requests: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 };
     daily[d].requests += 1;
     daily[d].inputTokens += r.inputTokens || 0;
     daily[d].outputTokens += r.outputTokens || 0;
+    daily[d].costUsd = Math.round(((daily[d].costUsd || 0) + (r.costUsd || 0)) * 1e6) / 1e6;
   }
+  const totalCost = Math.round(sum(rows, 'costUsd') * 1e6) / 1e6;
   const all = load();
   return {
     source: 'application-tracked',
@@ -118,6 +158,7 @@ function summary(q) {
       inputTokens: sum(rows, 'inputTokens'),
       outputTokens: sum(rows, 'outputTokens'),
       totalTokens: sum(rows, 'totalTokens'),
+      totalCostUsd: totalCost,
       requestsWithoutTokenCounts: rows.filter((r) => r.totalTokens === null).length,
     },
     byModel: group('model'),
@@ -131,15 +172,20 @@ function summary(q) {
       lastRecord: rows.length ? rows[rows.length - 1].ts : null,
     },
     cost: {
-      available: false,
-      note: 'Per-request cost is not returned by the Messages API. This app does not hardcode prices. See Anthropic-reported cost below when the Admin API is enabled.',
+      available: true,
+      estimated: true,
+      totalUsd: totalCost,
+      note: 'Per-request cost is estimated using Anthropic model pricing ($3/MTok in, $15/MTok out for Sonnet; $15/$75 for Opus; $0.80/$4 for Haiku 3.5; $0.25/$1.25 for Haiku 3).',
     },
     lastUpdated: new Date().toISOString(),
   };
 }
 
 function details(q) {
-  const rows = filtered(q).slice().reverse();
+  const rows = filtered(q).slice().reverse().map((r) => ({
+    ...r,
+    costUsd: r.costUsd !== undefined ? r.costUsd : calculateCost(r.model, r.inputTokens, r.outputTokens),
+  }));
   const pageSize = Math.min(Math.max(parseInt(q.pageSize, 10) || 25, 1), 200);
   const page = Math.max(parseInt(q.page, 10) || 1, 1);
   return {
@@ -151,4 +197,4 @@ function details(q) {
   };
 }
 
-module.exports = { record, summary, details, config };
+module.exports = { record, summary, details, config, calculateCost, getModelPricing };

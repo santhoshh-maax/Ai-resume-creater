@@ -2,8 +2,24 @@
 (function () {
   const esc = (s) => Preview.esc(s);
   const fmt = (n) => (n == null ? 'n/a' : Number(n).toLocaleString());
+  const fmtCost = (n) => {
+    if (n == null || !Number.isFinite(n)) return 'n/a';
+    if (n === 0) return '$0.0000';
+    return '$' + Number(n).toFixed(4);
+  };
   let page = 1;
   const PAGE_SIZE = 20;
+
+  function getCost(r) {
+    if (r.costUsd != null && Number.isFinite(r.costUsd)) return r.costUsd;
+    if (r.inputTokens == null && r.outputTokens == null) return null;
+    const m = String(r.model || '').toLowerCase();
+    let inRate = 3.0 / 1e6, outRate = 15.0 / 1e6;
+    if (m.includes('opus')) { inRate = 15.0 / 1e6; outRate = 75.0 / 1e6; }
+    else if (m.includes('3-5-haiku') || m.includes('3.5-haiku') || m.includes('haiku-4')) { inRate = 0.8 / 1e6; outRate = 4.0 / 1e6; }
+    else if (m.includes('haiku')) { inRate = 0.25 / 1e6; outRate = 1.25 / 1e6; }
+    return (r.inputTokens || 0) * inRate + (r.outputTokens || 0) * outRate;
+  }
 
   const el = (id) => document.getElementById(id);
 
@@ -62,12 +78,13 @@
         ${stat('Input tokens', fmt(t.inputTokens))}
         ${stat('Output tokens', fmt(t.outputTokens))}
         ${stat('Total tokens', fmt(t.totalTokens))}
+        ${stat('Estimated cost (USD)', fmtCost(t.totalCostUsd), 'ok')}
       </div>
       <p class="small muted">Period: ${esc(a.period.requested)}${a.period.firstRecord ? ` · first record ${esc(new Date(a.period.firstRecord).toLocaleString())}` : ''} · last updated ${esc(new Date(a.lastUpdated).toLocaleTimeString())}${t.requestsWithoutTokenCounts ? ` · ${t.requestsWithoutTokenCounts} request(s) have no token counts` : ''}</p>
       <div class="card"><h3>Tokens per day</h3>${chart(a.daily, 'inputTokens', 'outputTokens', 'Input tokens', 'Output tokens')}</div>
       <div class="grid cols-2">
-        <div class="card"><h3>By model</h3>${bars(a.byModel, 'totalTokens', (r) => `${fmt(r.requests)} req · ${fmt(r.totalTokens)} tok`)}</div>
-        <div class="card"><h3>By feature</h3>${bars(a.byFeature, 'totalTokens', (r) => `${fmt(r.requests)} req · ${fmt(r.totalTokens)} tok`)}</div>
+        <div class="card"><h3>By model</h3>${bars(a.byModel, 'totalTokens', (r) => `${fmt(r.requests)} req · ${fmt(r.totalTokens)} tok${r.costUsd != null ? ` · ${fmtCost(r.costUsd)}` : ''}`)}</div>
+        <div class="card"><h3>By feature</h3>${bars(a.byFeature, 'totalTokens', (r) => `${fmt(r.requests)} req · ${fmt(r.totalTokens)} tok${r.costUsd != null ? ` · ${fmtCost(r.costUsd)}` : ''}`)}</div>
       </div>
       <div class="card"><h3>Request log</h3><div id="usageTable"><p class="muted">Loading…</p></div></div>
       <p class="small muted">Cost: ${esc(a.cost.note)}</p>`;
@@ -106,10 +123,13 @@
       const d = await AI.get('/api/usage/details?' + q);
       if (!d.rows.length) { host.innerHTML = '<p class="empty">No requests recorded in this period yet.</p>'; return; }
       const pages = Math.max(1, Math.ceil(d.total / d.pageSize));
-      host.innerHTML = `<div class="table-wrap"><table class="data"><thead><tr><th>Time</th><th>Model</th><th>Feature</th><th class="num">Input</th><th class="num">Output</th><th class="num">Total</th><th>Status</th><th class="num">Duration</th><th>Error</th><th>Cost</th></tr></thead><tbody>
-        ${d.rows.map((r) => `<tr><td>${esc(new Date(r.ts).toLocaleString())}</td><td>${esc(r.model || 'n/a')}</td><td>${esc(r.feature)}</td>
-          <td class="num">${fmt(r.inputTokens)}</td><td class="num">${fmt(r.outputTokens)}</td><td class="num">${fmt(r.totalTokens)}</td>
-          <td><span class="pill ${r.status === 'success' ? 'success' : 'error'}">${esc(r.status)}</span></td><td class="num">${(r.durationMs / 1000).toFixed(1)}s</td><td>${esc(r.errorCategory || '')}</td><td>n/a</td></tr>`).join('')}
+      host.innerHTML = `<div class="table-wrap"><table class="data"><thead><tr><th>Time</th><th>Model</th><th>Feature</th><th class="num">Input</th><th class="num">Output</th><th class="num">Total</th><th>Status</th><th class="num">Duration</th><th>Error</th><th class="num">Cost</th></tr></thead><tbody>
+        ${d.rows.map((r) => {
+          const cost = getCost(r);
+          return `<tr><td>${esc(new Date(r.ts).toLocaleString())}</td><td>${esc(r.model || 'n/a')}</td><td>${esc(r.feature)}</td>
+            <td class="num">${fmt(r.inputTokens)}</td><td class="num">${fmt(r.outputTokens)}</td><td class="num">${fmt(r.totalTokens)}</td>
+            <td><span class="pill ${r.status === 'success' ? 'success' : 'error'}">${esc(r.status)}</span></td><td class="num">${(r.durationMs / 1000).toFixed(1)}s</td><td>${esc(r.errorCategory || '')}</td><td class="num" title="${cost != null ? '$' + Number(cost).toFixed(6) : ''}">${fmtCost(cost)}</td></tr>`;
+        }).join('')}
         </tbody></table></div>
         <div class="pager"><span class="small muted">${fmt(d.total)} records</span><button class="btn small" id="uPrev" ${page <= 1 ? 'disabled' : ''}>Prev</button><span>Page ${page} / ${pages}</span><button class="btn small" id="uNext" ${page >= pages ? 'disabled' : ''}>Next</button></div>`;
       const prev = el('uPrev'), next = el('uNext');
