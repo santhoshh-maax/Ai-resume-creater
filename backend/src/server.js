@@ -7,10 +7,17 @@ const { notFound, errorHandler } = require('./middleware/error');
 
 const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
 
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 600, standardHeaders: true, legacyHeaders: false,
-  message: { error: { code: 'RATE_LIMITED', message: 'Too many requests. Please slow down.' } } }));
+app.use('/api', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 600,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false, trustProxy: false },
+  message: { error: { code: 'RATE_LIMITED', message: 'Too many requests. Please slow down.' } },
+}));
 
 // Basic request timeout for API routes (AI routes enforce their own provider timeout).
 app.use('/api', (req, res, next) => { res.setTimeout(config.ai.timeoutMs + 20000); next(); });
