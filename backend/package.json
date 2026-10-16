@@ -4,6 +4,7 @@
   "description": "Natural language AI resume creator powered by Anthropic Claude",
   "main": "src/server.js",
   "scripts": {
+    "build": "npm install",
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test test/*.test.js"

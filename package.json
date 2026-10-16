@@ -1,0 +1,14 @@
+{
+  "name": "ai-resume-creator-app",
+  "version": "1.0.0",
+  "description": "Natural language AI resume creator powered by Anthropic Claude",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "build": "npm --prefix backend install",
+    "start": "node backend/src/server.js",
+    "test": "npm --prefix backend test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

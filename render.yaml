@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: ai-resume-creator
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: anthropic
+      - key: AI_MODEL
+        value: claude-sonnet-4-5
+      - key: AI_API_KEY
+        sync: false
