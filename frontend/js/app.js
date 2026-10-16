@@ -418,9 +418,14 @@
     App.state = saved ? hydrate(saved) : newState('scratch');
     ensureIds(App.state.resume); reconcileOrder();
 
-    $('btnNew').addEventListener('click', () => startNew('scratch'));
+    $('btnNew').addEventListener('click', () => { $('mainNav').classList.remove('open'); $('navToggle').setAttribute('aria-expanded', 'false'); startNew('scratch'); });
     $('navToggle').addEventListener('click', () => { const o = $('mainNav').classList.toggle('open'); $('navToggle').setAttribute('aria-expanded', o); });
-    document.querySelector('.nav a[data-nav=create]').addEventListener('click', () => { /* continue current draft */ });
+    document.querySelectorAll('#mainNav a').forEach((a) => {
+      a.addEventListener('click', () => {
+        $('mainNav').classList.remove('open');
+        $('navToggle').setAttribute('aria-expanded', 'false');
+      });
+    });
 
     document.addEventListener('click', (e) => {
       const st = e.target.closest('[data-start]');

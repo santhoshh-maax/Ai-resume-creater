@@ -615,3 +615,142 @@ table.data th.num {
   font-family: var(--font-mono);
   color: var(--text-muted);
 }
+
+/* ==========================================================================
+   Dashboard Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 840px) {
+  .hero {
+    padding: 28px 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: 2rem;
+  }
+  .hero-sub {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .pathway-card {
+    padding: 16px;
+    gap: 14px;
+  }
+  .pathway-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .pathway-text h3 {
+    font-size: 1.05rem;
+  }
+  .pathway-text p {
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters.filter-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .filters.filter-card label.inline {
+    width: 100%;
+  }
+  .filters.filter-card label.inline select,
+  .filters.filter-card label.inline input[type=date] {
+    width: 100%;
+  }
+  .view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .view-header .row.gap {
+    width: 100%;
+    display: flex;
+  }
+  .view-header .row.gap .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .stat {
+    padding: 12px;
+  }
+  .stat .v {
+    font-size: 1.35rem;
+  }
+  .stat .l {
+    font-size: 0.76rem;
+  }
+  .chart {
+    height: 180px;
+  }
+  .chart-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.78rem;
+  }
+  .bar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .bar-row .n {
+    width: 100%;
+    font-size: 0.84rem;
+  }
+  .bar-row .c {
+    width: 100%;
+    text-align: left;
+    font-size: 0.78rem;
+  }
+  .usage-teaser .teaser-stats {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 22px 16px;
+  }
+  .hero h1 {
+    font-size: 1.65rem;
+  }
+  .hero-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    gap: 6px;
+  }
+  .hero-perks {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .draft-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .draft-item .row,
+  .draft-item .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
