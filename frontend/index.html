@@ -3,240 +3,417 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Resume Creator</title>
+  <title>AI Resume Creator | Professional AI-Powered Resume Builder</title>
+  <meta name="description" content="Build an ATS-optimized, executive-ready resume in minutes by having a natural conversation with Claude AI. Instant live preview and high-resolution PDF download.">
   <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <!-- Modern Google Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/resume-preview.css">
 </head>
 <body>
+  <!-- Global Top Navigation Bar -->
   <header class="topbar">
-    <a class="brand" href="#/dashboard" aria-label="AI Resume Creator home">
-      <img src="assets/logo.svg" alt="" width="28" height="28">
-      <span>AI Resume Creator</span>
-    </a>
-    <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
-    <nav class="nav" id="mainNav" aria-label="Main">
-      <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
-      <a href="#/create" data-nav="create">Create Resume</a>
-      <a href="#/drafts" data-nav="drafts">My Drafts</a>
-      <a href="#/usage" data-nav="usage">AI API Usage</a>
-      <a href="#/settings" data-nav="settings">Settings</a>
-    </nav>
-    <button class="btn primary" id="btnNew">+ Create New Resume</button>
+    <div class="topbar-inner">
+      <a class="brand" href="#/dashboard" aria-label="AI Resume Creator Home">
+        <div class="brand-icon">
+          <img src="assets/logo.svg" alt="AI Resume Logo" width="30" height="30">
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">AI Resume Studio</span>
+          <span class="brand-badge">PRO AI</span>
+        </div>
+      </a>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <nav class="nav" id="mainNav" aria-label="Main Navigation">
+        <a href="#/dashboard" data-nav="dashboard">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="#/create" data-nav="create">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Create Resume</span>
+        </a>
+        <a href="#/drafts" data-nav="drafts">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>My Drafts</span>
+        </a>
+        <a href="#/usage" data-nav="usage">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>AI API Usage</span>
+        </a>
+        <a href="#/settings" data-nav="settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="btn primary glow" id="btnNew">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>New Resume</span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <div id="aiBanner" class="banner warn" hidden></div>
 
   <main>
-    <!-- Dashboard -->
+    <!-- View 1: Dashboard -->
     <section id="view-dashboard" class="view">
       <div class="container">
+        <!-- Hero Card -->
         <div class="hero card">
-          <div>
-            <h1>Build a job-ready resume by simply talking.</h1>
-            <p class="muted">Three simple steps: tell us about yourself, your resume is ready, download the PDF. Claude only uses the facts you give it, and you can edit everything.</p>
-            <div class="row gap">
-              <button class="btn primary lg" data-start="scratch">Create My Resume</button>
-              <button class="btn lg" data-start="job">Target a job description</button>
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="pulse-dot"></span>
+              <span>Claude 3.5 &amp; Sonnet 4.5 Intelligence</span>
+              <span class="badge-sep">•</span>
+              <span>ATS-Compliant Formats</span>
+            </div>
+            <h1>Build a job-winning resume <span class="gradient-text">by simply talking.</span></h1>
+            <p class="hero-sub">Describe your background in everyday language or paste your raw notes. Claude shapes it into a polished, high-impact resume adhering strictly to your verified facts.</p>
+            <div class="hero-actions row gap wrap">
+              <button class="btn primary lg glow-btn" data-start="scratch">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span>Create My Resume</span>
+              </button>
+              <button class="btn lg secondary-glass" data-start="job">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <span>Target a Job Description</span>
+              </button>
+            </div>
+            <div class="hero-perks">
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> No Prompt Engineering</span>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Executive &amp; ATS Layouts</span>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 100% Private Local Storage</span>
+              <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Zero Fabrications</span>
             </div>
           </div>
         </div>
 
-        <div class="grid cols-2">
-          <div class="card option" data-start="scratch" tabindex="0" role="button">
-            <h3>Start from scratch</h3>
-            <p class="muted">Answer a few conversational questions about your background, projects and skills.</p>
+        <!-- Quick Launch Pathways -->
+        <div class="grid cols-2 mt">
+          <div class="card option pathway-card" data-start="scratch" tabindex="0" role="button">
+            <div class="pathway-icon icon-scratch">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="pathway-text">
+              <h3>Start From Scratch</h3>
+              <p class="muted">Answer concise conversational questions about your background, skills, projects, and target position.</p>
+              <div class="pathway-cta">Launch Interview →</div>
+            </div>
           </div>
-          <div class="card option" data-start="job" tabindex="0" role="button">
-            <h3>Job-specific resume</h3>
-            <p class="muted">Paste a job description. Your resume is tailored using only your real qualifications, and gaps are flagged.</p>
+          <div class="card option pathway-card" data-start="job" tabindex="0" role="button">
+            <div class="pathway-icon icon-job">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div class="pathway-text">
+              <h3>Target a Job Opening</h3>
+              <p class="muted">Paste the exact job description. Claude highlights your matching strengths and flags missing requirements.</p>
+              <div class="pathway-cta">Target Role →</div>
+            </div>
           </div>
         </div>
 
-        <h2 class="section-h">Resume templates</h2>
+        <!-- Template Gallery -->
+        <div class="section-header">
+          <div>
+            <h2 class="section-h">Designer &amp; ATS Templates</h2>
+            <p class="section-sub">Switch anytime with one click. Clean formatting tailored for both human recruiters and automated parsers.</p>
+          </div>
+        </div>
         <div class="grid cols-4" id="dashTemplates"></div>
 
-        <div class="grid cols-2 mt">
-          <div class="card">
-            <h3>Recently edited drafts</h3>
+        <!-- Drafts & Usage Quick View -->
+        <div class="grid cols-2 mt-lg">
+          <div class="card glass-card">
+            <div class="card-head">
+              <h3>Recent Drafts</h3>
+              <a href="#/drafts" class="card-link">View all</a>
+            </div>
             <div id="dashDrafts" class="draft-list"></div>
           </div>
-          <div class="card">
-            <h3>AI API usage</h3>
-            <p class="muted">See tokens and requests made by this app, plus optional Anthropic-reported organization usage.</p>
-            <a class="btn" href="#/usage">Open usage dashboard</a>
+          <div class="card glass-card usage-teaser">
+            <div class="card-head">
+              <h3>AI API Intelligence &amp; Cost</h3>
+              <a href="#/usage" class="card-link">Open Dashboard →</a>
+            </div>
+            <p class="muted">Full transparent tracking of Claude tokens, latency, cost per request, and organization-level credit consumption.</p>
+            <div class="teaser-stats">
+              <div class="t-stat">
+                <span class="t-label">Security</span>
+                <span class="t-val">Localhost / Env Protected</span>
+              </div>
+              <div class="t-stat">
+                <span class="t-label">Telemetry</span>
+                <span class="t-val">Tokens, Latency &amp; Cost</span>
+              </div>
+            </div>
+            <a class="btn primary small glow" href="#/usage">View Real-time Usage &amp; Cost</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Drafts -->
+    <!-- View 2: Drafts -->
     <section id="view-drafts" class="view" hidden>
       <div class="container">
-        <h1>My Drafts</h1>
-        <p class="muted">Drafts are saved only in this browser (localStorage) on this device. They are not uploaded to any account.</p>
+        <div class="view-header">
+          <div>
+            <h1>My Saved Drafts</h1>
+            <p class="muted">All resume drafts are securely stored in your browser's private local storage. No resume text is ever stored on external databases.</p>
+          </div>
+          <button class="btn primary" data-start="scratch">+ Create New</button>
+        </div>
         <div id="draftsList" class="draft-list big"></div>
       </div>
     </section>
 
-    <!-- Workspace -->
+    <!-- View 3: Workspace (Create & Edit) -->
     <section id="view-create" class="view" hidden>
       <div class="mobile-switch" id="mobileSwitch">
         <button class="active" data-pane="left">Interview &amp; Edit</button>
-        <button data-pane="right">Preview</button>
+        <button data-pane="right">Preview &amp; PDF</button>
       </div>
       <div class="workspace" id="workspace" data-pane="left">
+        <!-- Left Pane: Studio Tools -->
         <div class="pane left">
           <div class="tabs" role="tablist">
-            <button class="tab active" data-tab="interview" role="tab">Interview</button>
-            <button class="tab" data-tab="edit" role="tab">Edit Resume</button>
-            <button class="tab" data-tab="job" role="tab">Job &amp; Tips</button>
+            <button class="tab active" data-tab="interview" role="tab">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>AI Interview</span>
+            </button>
+            <button class="tab" data-tab="edit" role="tab">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Edit Resume</span>
+            </button>
+            <button class="tab" data-tab="job" role="tab">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/></svg>
+              <span>Job Matcher &amp; Tips</span>
+            </button>
           </div>
 
-          <!-- Interview -->
+          <!-- Tab 1: AI Interview & Quick Input -->
           <div class="tabpane" id="tab-interview">
             <div class="quick" id="quickBox">
-              <div class="steps"><span><b>1</b> Tell us about you</span><span><b>2</b> Resume is ready</span><span><b>3</b> Download PDF</span></div>
-              <label class="field"><span>Paste or type everything about yourself, in any order</span>
-                <textarea id="quickText" rows="7" maxlength="8000" placeholder="Example: I am Asha Rao, final-year B.E. CSE student at ABC College (2023-2027, CGPA 8.5). Email asha@mail.com, phone +91 90000 00000, Chennai. Projects: Plant monitoring system using Arduino and soil sensor (Feb 2024); Pothole detection rover with YOLOv8 (2026). Skills: Python, C, SQL, Flutter, Git. Soft skills: leadership, teamwork. Languages: English, Tamil. Applying for IoT / AI engineer roles."></textarea></label>
-              <label class="field"><span>Job you are applying for (optional)</span><input id="quickRole" type="text" maxlength="200" placeholder="e.g. Embedded Systems Engineer"></label>
-              <div class="row gap wrap"><button class="btn primary lg" id="btnQuick" type="button">Create my resume</button><span class="muted small">Prefer questions? Just chat below.</span></div>
+              <div class="quick-header">
+                <span class="quick-title">⚡ Fast Track: Paste Your Raw Notes</span>
+              </div>
+              <div class="steps">
+                <span><b>1</b> Paste everything about you</span>
+                <span><b>2</b> AI formats resume</span>
+                <span><b>3</b> Download A4 PDF</span>
+              </div>
+              <label class="field">
+                <span>Education, projects, experience, skills, or target role in any order:</span>
+                <textarea id="quickText" rows="6" maxlength="8000" placeholder="Example: I am Asha Rao, final-year B.E. CSE student at ABC College (2023-2027, CGPA 8.5). Email asha@mail.com, phone +91 90000 00000, Chennai. Projects: Plant monitoring system using Arduino and soil sensor (Feb 2024); Pothole detection rover with YOLOv8 (2026). Skills: Python, C, SQL, Flutter, Git. Soft skills: leadership, teamwork. Languages: English, Tamil. Applying for IoT / AI engineer roles."></textarea>
+              </label>
+              <label class="field">
+                <span>Target role (optional)</span>
+                <input id="quickRole" type="text" maxlength="200" placeholder="e.g. Embedded Systems Engineer / Full-Stack Developer">
+              </label>
+              <div class="row gap wrap">
+                <button class="btn primary lg glow" id="btnQuick" type="button">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  <span>Build My Resume Now</span>
+                </button>
+                <span class="muted small">Or answer conversational questions below.</span>
+              </div>
             </div>
             <div class="chat" id="chatLog" aria-live="polite"></div>
             <div id="chatNotice" class="notice" hidden></div>
             <div class="chat-actions">
               <span id="readyHint" class="muted small"></span>
-              <button class="btn primary" id="btnGenerate" disabled>Generate Resume</button>
+              <button class="btn primary glow" id="btnGenerate" disabled>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Generate Resume</span>
+              </button>
             </div>
             <form class="chat-form" id="chatForm">
-              <textarea id="chatInput" rows="2" maxlength="4000" placeholder="Type your answer in plain language..."></textarea>
-              <button class="btn primary" id="chatSend" type="submit">Send</button>
+              <textarea id="chatInput" rows="2" maxlength="4000" placeholder="Type your answer or add more details in plain language..."></textarea>
+              <button class="btn primary glow" id="chatSend" type="submit" aria-label="Send message">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <span>Send</span>
+              </button>
             </form>
           </div>
 
-          <!-- Edit -->
+          <!-- Tab 2: Resume Editor -->
           <div class="tabpane" id="tab-edit" hidden>
             <div class="edit-toolbar">
-              <button class="btn small" id="btnUndo" disabled>Undo</button>
-              <button class="btn small" id="btnBackInterview">Back to interview</button>
-              <button class="btn small" id="btnAddSection">+ Add section</button>
+              <button class="btn small" id="btnUndo" disabled title="Revert last change">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                <span>Undo</span>
+              </button>
+              <button class="btn small" id="btnBackInterview">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Back to Interview</span>
+              </button>
+              <button class="btn small primary" id="btnAddSection">+ Add Custom Section</button>
             </div>
             <div id="editor"></div>
           </div>
 
-          <!-- Job & tips -->
+          <!-- Tab 3: Job Description & AI Suggestions -->
           <div class="tabpane" id="tab-job" hidden>
-            <label class="field">
-              <span>Target role</span>
-              <input id="targetRole" type="text" maxlength="200" placeholder="e.g. Junior Data Engineer">
-            </label>
-            <label class="field">
-              <span>Job description (optional)</span>
-              <textarea id="jobDescription" rows="8" maxlength="12000" placeholder="Paste the job description here"></textarea>
-            </label>
-            <div class="row gap wrap">
-              <button class="btn" id="btnAnalyze">Analyze job description</button>
-              <button class="btn" id="btnSuggest">Suggest improvements</button>
+            <div class="job-container">
+              <label class="field">
+                <span>Target Job Role</span>
+                <input id="targetRole" type="text" maxlength="200" placeholder="e.g. Senior Data Engineer / Backend Developer">
+              </label>
+              <label class="field">
+                <span>Paste Job Description</span>
+                <textarea id="jobDescription" rows="8" maxlength="12000" placeholder="Paste the full job posting here to benchmark keyword alignment and identify qualification gaps..."></textarea>
+              </label>
+              <div class="row gap wrap">
+                <button class="btn primary" id="btnAnalyze">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span>Analyze Job Match</span>
+                </button>
+                <button class="btn" id="btnSuggest">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                  <span>Suggest Content Enhancements</span>
+                </button>
+              </div>
+              <div id="jobResult" class="mt"></div>
             </div>
-            <div id="jobResult" class="mt"></div>
           </div>
         </div>
 
+        <!-- Right Pane: Live A4 Preview & Controls -->
         <div class="pane right">
           <div class="preview-toolbar">
-            <label class="inline">
-              <span>Template</span>
-              <select id="templateSelect"></select>
-            </label>
-            <label class="inline">
-              <span>Font</span>
-              <select id="fontSize">
-                <option value="small">Compact</option>
-                <option value="medium" selected>Standard</option>
-                <option value="large">Large</option>
-              </select>
-            </label>
-            <label class="inline">
-              <span>Accent</span>
-              <input type="color" id="accentColor" value="#1d4ed8">
-            </label>
+            <div class="tb-group">
+              <label class="inline">
+                <span>Layout</span>
+                <select id="templateSelect"></select>
+              </label>
+              <label class="inline">
+                <span>Font Scale</span>
+                <select id="fontSize">
+                  <option value="small">Compact</option>
+                  <option value="medium" selected>Standard</option>
+                  <option value="large">Large</option>
+                </select>
+              </label>
+              <label class="inline color-picker-label">
+                <span>Accent</span>
+                <input type="color" id="accentColor" value="#1d4ed8" title="Change theme accent color">
+              </label>
+            </div>
             <span class="spacer"></span>
-            <span id="saveStatus" class="save-status" role="status">Not saved yet</span>
-            <button class="btn small" id="btnFullPreview">Full preview</button>
-            <button class="btn primary" id="btnPdf">Download PDF</button>
+            <div class="tb-actions">
+              <span id="saveStatus" class="save-status" role="status">Auto-saved</span>
+              <button class="btn small" id="btnFullPreview" title="View Full Page Preview">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <span>Full Preview</span>
+              </button>
+              <button class="btn primary glow" id="btnPdf">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Download PDF</span>
+              </button>
+            </div>
           </div>
           <div id="previewBadge" class="notice" hidden></div>
-          <div class="preview-scroll"><div id="previewHost" class="preview-host"></div></div>
+          <div class="preview-scroll">
+            <div class="preview-stage">
+              <div id="previewHost" class="preview-host"></div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Usage -->
+    <!-- View 4: AI API Usage Dashboard -->
     <section id="view-usage" class="view" hidden>
       <div class="container">
-        <div class="row between wrap">
+        <div class="view-header row between wrap">
           <div>
-            <h1>AI API Usage</h1>
-            <p class="muted">Application-tracked usage and, if enabled, Anthropic-reported organization usage are shown separately and never added together.</p>
+            <h1>AI API Usage &amp; Analytics</h1>
+            <p class="muted">Live monitoring of Claude Messages API calls, token counts, request latency, and per-request cost calculation.</p>
           </div>
           <div class="row gap">
-            <button class="btn" id="usageExport" title="Export API usage to Excel spreadsheet">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <button class="btn export-btn" id="usageExport" title="Export current usage records to an Excel workbook">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
               <span>Export to Excel</span>
             </button>
-            <button class="btn" id="usageRefresh">Refresh</button>
+            <button class="btn" id="usageRefresh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>Refresh</span>
+            </button>
           </div>
         </div>
 
-        <div class="card filters">
-          <label class="inline"><span>Period</span>
+        <div class="card filters filter-card">
+          <label class="inline"><span>Time Window</span>
             <select id="uRange">
-              <option value="all">All time</option>
+              <option value="all">All Time</option>
               <option value="today">Today</option>
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="custom">Custom range</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="custom">Custom Date Range</option>
             </select>
           </label>
           <label class="inline" id="uFromWrap" hidden><span>From</span><input type="date" id="uFrom"></label>
           <label class="inline" id="uToWrap" hidden><span>To</span><input type="date" id="uTo"></label>
-          <label class="inline"><span>Model</span><select id="uModel"><option value="">All</option></select></label>
-          <label class="inline"><span>Feature</span><select id="uFeature"><option value="">All</option></select></label>
+          <label class="inline"><span>Filter Model</span><select id="uModel"><option value="">All Models</option></select></label>
+          <label class="inline"><span>Filter Feature</span><select id="uFeature"><option value="">All Features</option></select></label>
         </div>
 
-        <div id="usageBody"><p class="muted">Loading...</p></div>
+        <div id="usageBody"><p class="muted">Loading usage metrics…</p></div>
       </div>
     </section>
 
-    <!-- Settings -->
+    <!-- View 5: Settings -->
     <section id="view-settings" class="view" hidden>
       <div class="container narrow">
-        <h1>Settings</h1>
-        <div class="card">
-          <h3>AI configuration</h3>
-          <div id="configStatus" class="muted">Checking...</div>
-          <p class="small muted">API keys live only in <code>backend/.env</code> on the server and are never sent to the browser.</p>
+        <div class="view-header">
+          <h1>Application Settings</h1>
+          <p class="muted">Configuration status, security guarantees, and device storage options.</p>
         </div>
-        <div class="card">
-          <h3>Privacy &amp; local data</h3>
-          <p>Your drafts are stored in this browser only (localStorage). When you chat or use AI actions, the relevant resume text is sent to the Anthropic API through this app's server. Usage logs keep only metadata (time, model, feature, token counts, status).</p>
-          <button class="btn danger" id="btnClearDrafts">Clear all saved drafts</button>
+        <div class="card glass-card">
+          <div class="card-head">
+            <h3>Anthropic AI Connection</h3>
+          </div>
+          <div id="configStatus" class="muted">Checking status…</div>
+          <p class="small muted mt">Your API key is never exposed to browser clients. All calls are mediated through the secure local backend.</p>
+        </div>
+        <div class="card glass-card">
+          <div class="card-head">
+            <h3>Privacy &amp; Data Security</h3>
+          </div>
+          <p>Your resume drafts remain exclusively on your device within browser local storage. When running the AI interview or enhancements, only the pertinent text is sent to the Anthropic Messages API.</p>
+          <div class="danger-zone mt">
+            <button class="btn danger" id="btnClearDrafts">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <span>Clear All Saved Drafts</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modals -->
+  <!-- Global Modals -->
   <div class="modal" id="modal" hidden>
     <div class="modal-box" role="dialog" aria-modal="true">
-      <div class="modal-head"><strong id="modalTitle"></strong><button class="icon-btn" id="modalClose" aria-label="Close">&#10005;</button></div>
+      <div class="modal-head">
+        <strong id="modalTitle"></strong>
+        <button class="icon-btn" id="modalClose" aria-label="Close dialog">&#10005;</button>
+      </div>
       <div class="modal-body" id="modalBody"></div>
       <div class="modal-foot" id="modalFoot"></div>
     </div>
   </div>
   <div id="toasts" class="toasts" aria-live="polite"></div>
 
+  <!-- Client Application Scripts -->
   <script charset="utf-8" src="js/ai-client.js"></script>
   <script charset="utf-8" src="js/templates.js"></script>
   <script charset="utf-8" src="js/resume-preview.js"></script>

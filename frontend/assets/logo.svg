@@ -1,1 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#1d4ed8"/><path d="M9 7h10l5 5v13H9z" fill="#fff"/><path d="M19 7v5h5" fill="#bfdbfe"/><path d="M12 16h9M12 19h9M12 22h6" stroke="#1d4ed8" stroke-width="1.6" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#4f46e5" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="36" height="36" rx="10" fill="url(#bgGrad)"/>
+  <!-- Resume Sheet -->
+  <path d="M10 8C10 6.89543 10.8954 6 12 6H20.5858C21.1163 6 21.6251 6.21071 22 6.58579L25.4142 10C25.7893 10.3749 26 10.8837 26 11.4142V26C26 27.1046 25.1046 28 24 28H12C10.8954 28 10 27.1046 10 26V8Z" fill="#ffffff" fill-opacity="0.95"/>
+  <!-- Folded Corner -->
+  <path d="M20 6V10C20 10.5523 20.4477 11 21 11H25" fill="#e0e7ff"/>
+  <!-- Document Lines -->
+  <path d="M13.5 15H22.5M13.5 18.5H22.5M13.5 22H18.5" stroke="#4f46e5" stroke-width="1.6" stroke-linecap="round"/>
+  <!-- Sparkle Star -->
+  <path d="M26.5 4L27.4 6.6L30 7.5L27.4 8.4L26.5 11L25.6 8.4L23 7.5L25.6 6.6L26.5 4Z" fill="url(#starGrad)"/>
+</svg>
