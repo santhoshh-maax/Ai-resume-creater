@@ -27,4 +27,16 @@ router.get('/summary', wrap(async (req) => {
 
 router.get('/details', wrap(async (req) => usage.details(req.query)));
 
+router.get('/export', (req, res, next) => {
+  try {
+    const buffer = usage.exportExcel(req.query);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="ai-usage-${dateStr}.xlsx"`);
+    res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

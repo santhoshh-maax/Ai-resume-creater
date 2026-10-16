@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const XLSX = require('xlsx');
 const config = require('../config');
 
 const LOG_FILE = process.env.USAGE_LOG_FILE || path.join(__dirname, '..', '..', 'data', 'usage.jsonl');
@@ -197,4 +198,87 @@ function details(q) {
   };
 }
 
-module.exports = { record, summary, details, config, calculateCost, getModelPricing };
+function exportExcel(q) {
+  const rows = filtered(q).slice().reverse().map((r) => ({
+    ...r,
+    costUsd: r.costUsd !== undefined ? r.costUsd : calculateCost(r.model, r.inputTokens, r.outputTokens),
+  }));
+  const s = summary(q);
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: API Requests
+  const reqData = rows.map((r) => ({
+    'Date & Time': new Date(r.ts).toLocaleString(),
+    'Timestamp (ISO)': r.ts,
+    'Model': r.model || 'n/a',
+    'Feature': r.feature || 'unknown',
+    'Status': r.status || 'unknown',
+    'Duration (s)': Number((r.durationMs / 1000).toFixed(2)),
+    'Input Tokens': r.inputTokens != null ? r.inputTokens : '',
+    'Output Tokens': r.outputTokens != null ? r.outputTokens : '',
+    'Total Tokens': r.totalTokens != null ? r.totalTokens : '',
+    'Cost (USD)': r.costUsd != null ? Number(r.costUsd.toFixed(6)) : '',
+    'Error Category': r.errorCategory || '',
+  }));
+  const wsRequests = XLSX.utils.json_to_sheet(reqData);
+  wsRequests['!cols'] = [
+    { wch: 22 },
+    { wch: 26 },
+    { wch: 28 },
+    { wch: 20 },
+    { wch: 12 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 14 },
+    { wch: 18 },
+  ];
+  XLSX.utils.book_append_sheet(wb, wsRequests, 'API Requests');
+
+  // Sheet 2: Summary
+  const summaryRows = [
+    { 'Section': 'Totals', 'Metric': 'Total Requests', 'Value': s.totals.requests },
+    { 'Section': 'Totals', 'Metric': 'Successful Requests', 'Value': s.totals.successful },
+    { 'Section': 'Totals', 'Metric': 'Failed Requests', 'Value': s.totals.failed },
+    { 'Section': 'Totals', 'Metric': 'Total Input Tokens', 'Value': s.totals.inputTokens },
+    { 'Section': 'Totals', 'Metric': 'Total Output Tokens', 'Value': s.totals.outputTokens },
+    { 'Section': 'Totals', 'Metric': 'Total Tokens', 'Value': s.totals.totalTokens },
+    { 'Section': 'Totals', 'Metric': 'Total Estimated Cost (USD)', 'Value': `$${s.totals.totalCostUsd.toFixed(4)}` },
+    { 'Section': 'Totals', 'Metric': 'Period Filter', 'Value': s.period.requested },
+    { 'Section': 'Totals', 'Metric': 'Export Generated At', 'Value': new Date().toLocaleString() },
+  ];
+
+  if (s.byModel && s.byModel.length) {
+    s.byModel.forEach((m) => {
+      summaryRows.push({
+        'Section': 'By Model',
+        'Metric': m.name,
+        'Value': `${m.requests} requests | ${m.totalTokens} tokens | $${(m.costUsd || 0).toFixed(4)}`,
+      });
+    });
+  }
+
+  if (s.byFeature && s.byFeature.length) {
+    s.byFeature.forEach((f) => {
+      summaryRows.push({
+        'Section': 'By Feature',
+        'Metric': f.name,
+        'Value': `${f.requests} requests | ${f.totalTokens} tokens | $${(f.costUsd || 0).toFixed(4)}`,
+      });
+    });
+  }
+
+  const wsSummary = XLSX.utils.json_to_sheet(summaryRows);
+  wsSummary['!cols'] = [
+    { wch: 16 },
+    { wch: 28 },
+    { wch: 45 },
+  ];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Usage Summary');
+
+  return XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+}
+
+module.exports = { record, summary, details, config, calculateCost, getModelPricing, exportExcel };

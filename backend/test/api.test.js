@@ -101,3 +101,17 @@ test('usage summary matches recorded requests', async () => {
   assert.strictEqual(typeof d.rows[0].costUsd, 'number');
   assert.ok(!JSON.stringify(d).includes('test-key'));
 });
+
+test('usage excel export returns valid xlsx buffer', async () => {
+  const r = await fetch(base + '/api/usage/export');
+  assert.strictEqual(r.status, 200);
+  assert.ok(r.headers.get('content-type').includes('spreadsheetml'));
+  assert.ok(r.headers.get('content-disposition').includes('.xlsx'));
+  const buf = Buffer.from(await r.arrayBuffer());
+  assert.ok(buf.length > 500);
+  const XLSX = require('xlsx');
+  const wb = XLSX.read(buf, { type: 'buffer' });
+  assert.ok(wb.SheetNames.includes('API Requests'));
+  assert.ok(wb.SheetNames.includes('Usage Summary'));
+});
+

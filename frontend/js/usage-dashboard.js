@@ -156,14 +156,106 @@
     }
   }
 
-  function init() {
-    el('usageRefresh').addEventListener('click', load);
-    ['uRange', 'uFrom', 'uTo', 'uModel', 'uFeature'].forEach((id) => el(id).addEventListener('change', () => {
-      const custom = el('uRange').value === 'custom';
-      el('uFromWrap').hidden = !custom; el('uToWrap').hidden = !custom;
-      load();
-    }));
+  async function exportClientExcel(q) {
+    const d = await AI.get('/api/usage/details?' + q + '&pageSize=5000');
+    const rows = d.rows || [];
+    const dateStr = new Date().toISOString().slice(0, 10);
+
+    let xml = `<?xml version="1.0"?>\r\n<?mso-application progid="Excel.Sheet"?>\r\n` +
+      `<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ` +
+      `xmlns:o="urn:schemas-microsoft-com:office:office" ` +
+      `xmlns:x="urn:schemas-microsoft-com:office:excel" ` +
+      `xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\r\n` +
+      `<Styles><Style ss:ID="H"><Font ss:Bold="1"/><Interior ss:Color="#F1F5F9" ss:Pattern="Solid"/></Style></Styles>\r\n` +
+      `<Worksheet ss:Name="API Requests"><Table>\r\n` +
+      `<Row ss:StyleID="H">` +
+      `<Cell><Data ss:Type="String">Date &amp; Time</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Model</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Feature</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Status</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Duration (s)</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Input Tokens</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Output Tokens</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Total Tokens</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Cost (USD)</Data></Cell>` +
+      `<Cell><Data ss:Type="String">Error</Data></Cell>` +
+      `</Row>\r\n`;
+
+    for (const r of rows) {
+      const cost = getCost(r);
+      const escapeXml = (val) => String(val == null ? '' : val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      xml += `<Row>` +
+        `<Cell><Data ss:Type="String">${escapeXml(new Date(r.ts).toLocaleString())}</Data></Cell>` +
+        `<Cell><Data ss:Type="String">${escapeXml(r.model || 'n/a')}</Data></Cell>` +
+        `<Cell><Data ss:Type="String">${escapeXml(r.feature || 'unknown')}</Data></Cell>` +
+        `<Cell><Data ss:Type="String">${escapeXml(r.status || '')}</Data></Cell>` +
+        `<Cell><Data ss:Type="Number">${(r.durationMs / 1000).toFixed(2)}</Data></Cell>` +
+        `<Cell><Data ss:Type="${r.inputTokens != null ? 'Number' : 'String'}">${r.inputTokens != null ? r.inputTokens : ''}</Data></Cell>` +
+        `<Cell><Data ss:Type="${r.outputTokens != null ? 'Number' : 'String'}">${r.outputTokens != null ? r.outputTokens : ''}</Data></Cell>` +
+        `<Cell><Data ss:Type="${r.totalTokens != null ? 'Number' : 'String'}">${r.totalTokens != null ? r.totalTokens : ''}</Data></Cell>` +
+        `<Cell><Data ss:Type="${cost != null ? 'Number' : 'String'}">${cost != null ? Number(cost.toFixed(6)) : ''}</Data></Cell>` +
+        `<Cell><Data ss:Type="String">${escapeXml(r.errorCategory || '')}</Data></Cell>` +
+        `</Row>\r\n`;
+    }
+
+    xml += `</Table></Worksheet></Workbook>`;
+    const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ai-usage-${dateStr}.xls`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
-  window.UsageDashboard = { init, load };
+  async function exportExcel() {
+    const exportBtn = el('usageExport');
+    if (!exportBtn) return;
+    const origHtml = exportBtn.innerHTML;
+    exportBtn.disabled = true;
+    exportBtn.textContent = 'Exporting…';
+
+    try {
+      const q = query();
+      const res = await fetch('/api/usage/export?' + q);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.download = `ai-usage-${dateStr}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } else {
+        await exportClientExcel(q);
+      }
+    } catch (e) {
+      await exportClientExcel(query());
+    } finally {
+      exportBtn.disabled = false;
+      exportBtn.innerHTML = origHtml;
+    }
+  }
+
+  function init() {
+    const refreshBtn = el('usageRefresh');
+    if (refreshBtn) refreshBtn.addEventListener('click', load);
+    const exportBtn = el('usageExport');
+    if (exportBtn) exportBtn.addEventListener('click', exportExcel);
+    ['uRange', 'uFrom', 'uTo', 'uModel', 'uFeature'].forEach((id) => {
+      const elem = el(id);
+      if (elem) elem.addEventListener('change', () => {
+        const custom = el('uRange').value === 'custom';
+        el('uFromWrap').hidden = !custom; el('uToWrap').hidden = !custom;
+        load();
+      });
+    });
+  }
+
+  window.UsageDashboard = { init, load, exportExcel };
 })();
