@@ -1,0 +1,20 @@
+{
+  "name": "ai-resume-creator",
+  "version": "1.0.0",
+  "description": "Natural language AI resume creator powered by Anthropic Claude",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "puppeteer-core": "^23.5.0"
+  }
+}
+
+

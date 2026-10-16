@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Resume Creator</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/resume-preview.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/dashboard" aria-label="AI Resume Creator home">
+      <img src="assets/logo.svg" alt="" width="28" height="28">
+      <span>AI Resume Creator</span>
+    </a>
+    <button class="icon-btn nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+    <nav class="nav" id="mainNav" aria-label="Main">
+      <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#/create" data-nav="create">Create Resume</a>
+      <a href="#/drafts" data-nav="drafts">My Drafts</a>
+      <a href="#/usage" data-nav="usage">AI API Usage</a>
+      <a href="#/settings" data-nav="settings">Settings</a>
+    </nav>
+    <button class="btn primary" id="btnNew">+ Create New Resume</button>
+  </header>
+
+  <div id="aiBanner" class="banner warn" hidden></div>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view">
+      <div class="container">
+        <div class="hero card">
+          <div>
+            <h1>Build a job-ready resume by simply talking.</h1>
+            <p class="muted">Three simple steps: tell us about yourself, your resume is ready, download the PDF. Claude only uses the facts you give it, and you can edit everything.</p>
+            <div class="row gap">
+              <button class="btn primary lg" data-start="scratch">Create My Resume</button>
+              <button class="btn lg" data-start="job">Target a job description</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card option" data-start="scratch" tabindex="0" role="button">
+            <h3>Start from scratch</h3>
+            <p class="muted">Answer a few conversational questions about your background, projects and skills.</p>
+          </div>
+          <div class="card option" data-start="job" tabindex="0" role="button">
+            <h3>Job-specific resume</h3>
+            <p class="muted">Paste a job description. Your resume is tailored using only your real qualifications, and gaps are flagged.</p>
+          </div>
+        </div>
+
+        <h2 class="section-h">Resume templates</h2>
+        <div class="grid cols-4" id="dashTemplates"></div>
+
+        <div class="grid cols-2 mt">
+          <div class="card">
+            <h3>Recently edited drafts</h3>
+            <div id="dashDrafts" class="draft-list"></div>
+          </div>
+          <div class="card">
+            <h3>AI API usage</h3>
+            <p class="muted">See tokens and requests made by this app, plus optional Anthropic-reported organization usage.</p>
+            <a class="btn" href="#/usage">Open usage dashboard</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Drafts -->
+    <section id="view-drafts" class="view" hidden>
+      <div class="container">
+        <h1>My Drafts</h1>
+        <p class="muted">Drafts are saved only in this browser (localStorage) on this device. They are not uploaded to any account.</p>
+        <div id="draftsList" class="draft-list big"></div>
+      </div>
+    </section>
+
+    <!-- Workspace -->
+    <section id="view-create" class="view" hidden>
+      <div class="mobile-switch" id="mobileSwitch">
+        <button class="active" data-pane="left">Interview &amp; Edit</button>
+        <button data-pane="right">Preview</button>
+      </div>
+      <div class="workspace" id="workspace" data-pane="left">
+        <div class="pane left">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="interview" role="tab">Interview</button>
+            <button class="tab" data-tab="edit" role="tab">Edit Resume</button>
+            <button class="tab" data-tab="job" role="tab">Job &amp; Tips</button>
+          </div>
+
+          <!-- Interview -->
+          <div class="tabpane" id="tab-interview">
+            <div class="quick" id="quickBox">
+              <div class="steps"><span><b>1</b> Tell us about you</span><span><b>2</b> Resume is ready</span><span><b>3</b> Download PDF</span></div>
+              <label class="field"><span>Paste or type everything about yourself, in any order</span>
+                <textarea id="quickText" rows="7" maxlength="8000" placeholder="Example: I am Asha Rao, final-year B.E. CSE student at ABC College (2023-2027, CGPA 8.5). Email asha@mail.com, phone +91 90000 00000, Chennai. Projects: Plant monitoring system using Arduino and soil sensor (Feb 2024); Pothole detection rover with YOLOv8 (2026). Skills: Python, C, SQL, Flutter, Git. Soft skills: leadership, teamwork. Languages: English, Tamil. Applying for IoT / AI engineer roles."></textarea></label>
+              <label class="field"><span>Job you are applying for (optional)</span><input id="quickRole" type="text" maxlength="200" placeholder="e.g. Embedded Systems Engineer"></label>
+              <div class="row gap wrap"><button class="btn primary lg" id="btnQuick" type="button">Create my resume</button><span class="muted small">Prefer questions? Just chat below.</span></div>
+            </div>
+            <div class="chat" id="chatLog" aria-live="polite"></div>
+            <div id="chatNotice" class="notice" hidden></div>
+            <div class="chat-actions">
+              <span id="readyHint" class="muted small"></span>
+              <button class="btn primary" id="btnGenerate" disabled>Generate Resume</button>
+            </div>
+            <form class="chat-form" id="chatForm">
+              <textarea id="chatInput" rows="2" maxlength="4000" placeholder="Type your answer in plain language..."></textarea>
+              <button class="btn primary" id="chatSend" type="submit">Send</button>
+            </form>
+          </div>
+
+          <!-- Edit -->
+          <div class="tabpane" id="tab-edit" hidden>
+            <div class="edit-toolbar">
+              <button class="btn small" id="btnUndo" disabled>Undo</button>
+              <button class="btn small" id="btnBackInterview">Back to interview</button>
+              <button class="btn small" id="btnAddSection">+ Add section</button>
+            </div>
+            <div id="editor"></div>
+          </div>
+
+          <!-- Job & tips -->
+          <div class="tabpane" id="tab-job" hidden>
+            <label class="field">
+              <span>Target role</span>
+              <input id="targetRole" type="text" maxlength="200" placeholder="e.g. Junior Data Engineer">
+            </label>
+            <label class="field">
+              <span>Job description (optional)</span>
+              <textarea id="jobDescription" rows="8" maxlength="12000" placeholder="Paste the job description here"></textarea>
+            </label>
+            <div class="row gap wrap">
+              <button class="btn" id="btnAnalyze">Analyze job description</button>
+              <button class="btn" id="btnSuggest">Suggest improvements</button>
+            </div>
+            <div id="jobResult" class="mt"></div>
+          </div>
+        </div>
+
+        <div class="pane right">
+          <div class="preview-toolbar">
+            <label class="inline">
+              <span>Template</span>
+              <select id="templateSelect"></select>
+            </label>
+            <label class="inline">
+              <span>Font</span>
+              <select id="fontSize">
+                <option value="small">Compact</option>
+                <option value="medium" selected>Standard</option>
+                <option value="large">Large</option>
+              </select>
+            </label>
+            <label class="inline">
+              <span>Accent</span>
+              <input type="color" id="accentColor" value="#1d4ed8">
+            </label>
+            <span class="spacer"></span>
+            <span id="saveStatus" class="save-status" role="status">Not saved yet</span>
+            <button class="btn small" id="btnFullPreview">Full preview</button>
+            <button class="btn primary" id="btnPdf">Download PDF</button>
+          </div>
+          <div id="previewBadge" class="notice" hidden></div>
+          <div class="preview-scroll"><div id="previewHost" class="preview-host"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Usage -->
+    <section id="view-usage" class="view" hidden>
+      <div class="container">
+        <div class="row between wrap">
+          <div>
+            <h1>AI API Usage</h1>
+            <p class="muted">Application-tracked usage and, if enabled, Anthropic-reported organization usage are shown separately and never added together.</p>
+          </div>
+          <button class="btn" id="usageRefresh">Refresh</button>
+        </div>
+
+        <div class="card filters">
+          <label class="inline"><span>Period</span>
+            <select id="uRange">
+              <option value="all">All time</option>
+              <option value="today">Today</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="custom">Custom range</option>
+            </select>
+          </label>
+          <label class="inline" id="uFromWrap" hidden><span>From</span><input type="date" id="uFrom"></label>
+          <label class="inline" id="uToWrap" hidden><span>To</span><input type="date" id="uTo"></label>
+          <label class="inline"><span>Model</span><select id="uModel"><option value="">All</option></select></label>
+          <label class="inline"><span>Feature</span><select id="uFeature"><option value="">All</option></select></label>
+        </div>
+
+        <div id="usageBody"><p class="muted">Loading...</p></div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view" hidden>
+      <div class="container narrow">
+        <h1>Settings</h1>
+        <div class="card">
+          <h3>AI configuration</h3>
+          <div id="configStatus" class="muted">Checking...</div>
+          <p class="small muted">API keys live only in <code>backend/.env</code> on the server and are never sent to the browser.</p>
+        </div>
+        <div class="card">
+          <h3>Privacy &amp; local data</h3>
+          <p>Your drafts are stored in this browser only (localStorage). When you chat or use AI actions, the relevant resume text is sent to the Anthropic API through this app's server. Usage logs keep only metadata (time, model, feature, token counts, status).</p>
+          <button class="btn danger" id="btnClearDrafts">Clear all saved drafts</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modals -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true">
+      <div class="modal-head"><strong id="modalTitle"></strong><button class="icon-btn" id="modalClose" aria-label="Close">&#10005;</button></div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script charset="utf-8" src="js/ai-client.js"></script>
+  <script charset="utf-8" src="js/templates.js"></script>
+  <script charset="utf-8" src="js/resume-preview.js"></script>
+  <script charset="utf-8" src="js/resume-editor.js"></script>
+  <script charset="utf-8" src="js/interview.js"></script>
+  <script charset="utf-8" src="js/pdf-export.js"></script>
+  <script charset="utf-8" src="js/usage-dashboard.js"></script>
+  <script charset="utf-8" src="js/app.js"></script>
+</body>
+</html>
